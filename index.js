@@ -6,14 +6,17 @@ var server = http.createServer(app);
 var io = require('socket.io')(server);
 
 app.use(express.static(__dirname + '/public'));
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html')
 })
 
-io.on('connection', function(socket) {
-    console.log("user connected");
-    socket.on("newMessage", function(chat) {
-        io.emit("displayMsg", chat);
+io.on('connection', (socket) => {
+    console.log(socket.handshake.address);
+    socket.on("newMessage", (chat) => {
+        socket.broadcast.emit("displayMsg", chat);
+    })
+    socket.on("typing",(item) => {
+   		socket.broadcast.emit("typingMsg", item);
     })
 });
 

@@ -9,8 +9,11 @@ export default class extends React.Component{
 	constructor(props){
 		super(props);
 		this.socket = io();
+		this.timer;
 		this.state={
 			userName: "",
+			typing: false,
+			typer: "",
 			chatVisible: false,
 			chats:[]
 		}
@@ -33,7 +36,7 @@ export default class extends React.Component{
 
 	  // Otherwise, we need to ask the user for permission
 	  else if (Notification.permission !== "denied") {
-	    Notification.requestPermission(function (permission) {
+	    Notification.requestPermission((permission) => {
 	      // If the user accepts, let's create a notification
 	      if (permission === "granted" && chat.name!=this.state.userName) {
 			notification = new Notification(chat.name,{
@@ -42,17 +45,33 @@ export default class extends React.Component{
 				icon: '../../images/noti.png'
 			});
 	      }
-	    }.bind(this));
+	    });
 	  }
 	}
 	componentDidMount(){
-		this.socket.on("displayMsg",function(chat){
+		this.socket.on("displayMsg", (chat) => {
+			chat.status = "received";
+			this.setState({typing: false});
 			this.pushChat(chat);
 			this.notifyme(chat);
-		}.bind(this))
+		})
+		this.socket.on("typingMsg",function(item){
+			this.setState({typing: item.typing, typer: item.userName})
+		})
 	}
 	componentDidUpdate(){
 		$(".chat_container").scrollTop($(".chat_container").children().height());
+	}
+	change(){
+		clearTimeout(this.timer);
+		var typing, userName;
+		userName = this.state.userName;
+		typing = true;
+		this.socket.emit("typing", {userName, typing});
+		this.timer = setTimeout(() => {
+			typing = false;
+			this.socket.emit("typing", {userName, typing});
+		},2000)
 	}
 	pushChat(chat){
 		var chats = this.state.chats;
@@ -60,7 +79,10 @@ export default class extends React.Component{
 		this.setState({chats: chats})
 	}
 	newChatMsg(msg){
-		var name = this.state.userName
+		var name = this.state.userName;
+		var chats = {msg,name};
+		chats.status = "send";
+		this.pushChat(chats)
 		this.socket.emit("newMessage",{msg, name});
 	}
 	toggleState(name){
@@ -70,8 +92,9 @@ export default class extends React.Component{
 		return(
 			<div className="container">
 				<ChatList chats={this.state.chats}/>
-				{
-					this.state.chatVisible? <InputField newChatMsg = {this.newChatMsg.bind(this)} />:<Welcome toggleState = {this.toggleState.bind(this)} />
+					<div id="typing" className={this.state.typing?"visible":"hidden"}>{this.state.typer} is typing.....</div>
+				{	
+					this.state.chatVisible? <InputField newChatMsg = {this.newChatMsg.bind(this)} change = {this.change.bind(this)} />:<Welcome toggleState = {this.toggleState.bind(this)} />
 				}
 			</div>
 		)

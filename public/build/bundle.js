@@ -9577,8 +9577,11 @@ var _class = function (_React$Component) {
 		var _this = _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, props));
 
 		_this.socket = io();
+		_this.timer;
 		_this.state = {
 			userName: "",
+			typing: false,
+			typer: "",
 			chatVisible: false,
 			chats: []
 		};
@@ -9588,6 +9591,8 @@ var _class = function (_React$Component) {
 	_createClass(_class, [{
 		key: 'notifyme',
 		value: function notifyme(chat) {
+			var _this2 = this;
+
 			// Let's check if the browser supports notifications
 			var notification;
 			if (!("Notification" in window)) {
@@ -9607,28 +9612,50 @@ var _class = function (_React$Component) {
 				else if (Notification.permission !== "denied") {
 						Notification.requestPermission(function (permission) {
 							// If the user accepts, let's create a notification
-							if (permission === "granted" && chat.name != this.state.userName) {
+							if (permission === "granted" && chat.name != _this2.state.userName) {
 								notification = new Notification(chat.name, {
 									body: chat.msg,
 									iconUrl: '../../images/noti.png',
 									icon: '../../images/noti.png'
 								});
 							}
-						}.bind(this));
+						});
 					}
 		}
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
+			var _this3 = this;
+
 			this.socket.on("displayMsg", function (chat) {
-				this.pushChat(chat);
-				this.notifyme(chat);
-			}.bind(this));
+				chat.status = "received";
+				_this3.setState({ typing: false });
+				_this3.pushChat(chat);
+				_this3.notifyme(chat);
+			});
+			this.socket.on("typingMsg", function (item) {
+				this.setState({ typing: item.typing, typer: item.userName });
+			});
 		}
 	}, {
 		key: 'componentDidUpdate',
 		value: function componentDidUpdate() {
 			(0, _jquery2.default)(".chat_container").scrollTop((0, _jquery2.default)(".chat_container").children().height());
+		}
+	}, {
+		key: 'change',
+		value: function change() {
+			var _this4 = this;
+
+			clearTimeout(this.timer);
+			var typing, userName;
+			userName = this.state.userName;
+			typing = true;
+			this.socket.emit("typing", { userName: userName, typing: typing });
+			this.timer = setTimeout(function () {
+				typing = false;
+				_this4.socket.emit("typing", { userName: userName, typing: typing });
+			}, 2000);
 		}
 	}, {
 		key: 'pushChat',
@@ -9641,6 +9668,9 @@ var _class = function (_React$Component) {
 		key: 'newChatMsg',
 		value: function newChatMsg(msg) {
 			var name = this.state.userName;
+			var chats = { msg: msg, name: name };
+			chats.status = "send";
+			this.pushChat(chats);
 			this.socket.emit("newMessage", { msg: msg, name: name });
 		}
 	}, {
@@ -9655,7 +9685,13 @@ var _class = function (_React$Component) {
 				'div',
 				{ className: 'container' },
 				_react2.default.createElement(_chatList2.default, { chats: this.state.chats }),
-				this.state.chatVisible ? _react2.default.createElement(_inputList2.default, { newChatMsg: this.newChatMsg.bind(this) }) : _react2.default.createElement(_welcome2.default, { toggleState: this.toggleState.bind(this) })
+				_react2.default.createElement(
+					'div',
+					{ id: 'typing', className: this.state.typing ? "visible" : "hidden" },
+					this.state.typer,
+					' is typing.....'
+				),
+				this.state.chatVisible ? _react2.default.createElement(_inputList2.default, { newChatMsg: this.newChatMsg.bind(this), change: this.change.bind(this) }) : _react2.default.createElement(_welcome2.default, { toggleState: this.toggleState.bind(this) })
 			);
 		}
 	}]);
@@ -9727,30 +9763,67 @@ var _class = function (_React$Component) {
 	}
 
 	_createClass(_class, [{
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			var elem = _reactDom2.default.findDOMNode(this.ele);
+			if (elem) {
+				elem.scrollIntoView(false);
+			}
+		}
+	}, {
 		key: 'render',
 		value: function render() {
+			var _this2 = this;
+
 			return _react2.default.createElement(
 				'div',
 				{ className: 'chatlist_container' },
 				this.props.chats.map(function (item, index) {
-					return _react2.default.createElement(
-						'div',
-						{ key: index, className: 'chat' },
-						item.name,
-						_react2.default.createElement(
+					var chat;
+					if (item.status == "received") {
+						chat = _react2.default.createElement(
 							'div',
-							{ className: 'talk-bubble tri-right left-in' },
+							{ key: index, className: 'chat', ref: function ref(node) {
+									_this2.ele = node;
+								} },
+							item.name,
 							_react2.default.createElement(
 								'div',
-								{ className: 'talktext' },
+								{ className: 'talk-bubble tri-right left-in' },
 								_react2.default.createElement(
-									'p',
-									null,
-									item.msg
+									'div',
+									{ className: 'talktext' },
+									_react2.default.createElement(
+										'p',
+										null,
+										item.msg
+									)
 								)
 							)
-						)
-					);
+						);
+					} else {
+						chat = _react2.default.createElement(
+							'div',
+							{ key: index, className: 'chat send', ref: function ref(node) {
+									_this2.ele = node;
+								} },
+							_react2.default.createElement(
+								'div',
+								{ className: 'talk-bubble tri-right left-in send' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'talktext' },
+									_react2.default.createElement(
+										'p',
+										null,
+										item.msg
+									)
+								)
+							),
+							item.name
+						);
+					}
+					return chat;
 				})
 			);
 		}
@@ -9800,10 +9873,24 @@ var _class = function (_React$Component) {
 	}
 
 	_createClass(_class, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.textInput.focus();
+		}
+	}, {
+		key: 'enter',
+		value: function enter(e) {
+			if (e.keyCode == 13) {
+				this.chatMsg();
+			}
+		}
+	}, {
 		key: 'chatMsg',
 		value: function chatMsg() {
-			this.props.newChatMsg(this.textInput.value);
-			this.textInput.value = "";
+			if (this.textInput.value != "") {
+				this.props.newChatMsg(this.textInput.value);
+				this.textInput.value = "";
+			}
 		}
 	}, {
 		key: 'render',
@@ -9813,7 +9900,7 @@ var _class = function (_React$Component) {
 			return _react2.default.createElement(
 				'div',
 				{ className: 'inputfield_container' },
-				_react2.default.createElement('input', { className: 'form-control', type: 'text', ref: function ref(input) {
+				_react2.default.createElement('input', { className: 'form-control', type: 'text', onKeyDown: this.enter.bind(this), onChange: this.props.change, ref: function ref(input) {
 						_this2.textInput = input;
 					} }),
 				_react2.default.createElement(
@@ -9869,6 +9956,18 @@ var _class = function (_React$Component) {
 	}
 
 	_createClass(_class, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.textInput.focus();
+		}
+	}, {
+		key: 'enter',
+		value: function enter(e) {
+			if (e.keyCode == 13) {
+				this.checkInput();
+			}
+		}
+	}, {
 		key: 'checkInput',
 		value: function checkInput() {
 			if (this.textInput.value != "") {
@@ -9891,7 +9990,7 @@ var _class = function (_React$Component) {
 						null,
 						'Enter your nick name'
 					),
-					_react2.default.createElement('input', { className: 'form-control', type: 'text', ref: function ref(input) {
+					_react2.default.createElement('input', { className: 'form-control', type: 'text', onKeyDown: this.enter.bind(this), ref: function ref(input) {
 							_this2.textInput = input;
 						} }),
 					_react2.default.createElement(
