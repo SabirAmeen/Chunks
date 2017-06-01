@@ -2,21 +2,16 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import ChatList from './chatList.jsx';
 import $ from 'jquery';
+import {connect} from 'react-redux';
+import {current, action} from '../actions.jsx';
 import InputField from './inputList.jsx'
 import Welcome from './welcome.jsx';
 
-export default class extends React.Component{
+class Main extends React.Component{
 	constructor(props){
 		super(props);
 		this.socket = io();
 		this.timer;
-		this.state={
-			userName: "",
-			typing: false,
-			typer: "",
-			chatVisible: false,
-			chats:[]
-		}
 	}
 	notifyme(chat){
 	  // Let's check if the browser supports notifications
@@ -25,7 +20,7 @@ export default class extends React.Component{
 	    alert("This browser does not support desktop notification");
 	  }
 	  // Let's check whether notification permissions have already been granted
-	  else if (Notification.permission === "granted" && chat.name!=this.state.userName) {
+	  else if (Notification.permission === "granted" && chat.name!=this.props.current.userName) {
 	    // If it's okay let's create a notification
 		notification = new Notification(chat.name,{
 			body: chat.msg,
@@ -38,7 +33,7 @@ export default class extends React.Component{
 	  else if (Notification.permission !== "denied") {
 	    Notification.requestPermission((permission) => {
 	      // If the user accepts, let's create a notification
-	      if (permission === "granted" && chat.name!=this.state.userName) {
+	      if (permission === "granted" && chat.name!=this.props.current.userName) {
 			notification = new Notification(chat.name,{
 				body: chat.msg,
 				iconUrl:'../../images/noti.png',
@@ -51,12 +46,12 @@ export default class extends React.Component{
 	componentDidMount(){
 		this.socket.on("displayMsg", (chat) => {
 			chat.status = "received";
-			this.setState({typing: false});
+			this.props.typing({typing: false});
 			this.pushChat(chat);
 			this.notifyme(chat);
 		})
-		this.socket.on("typingMsg",function(item){
-			this.setState({typing: item.typing, typer: item.userName})
+		this.socket.on("typingMsg",(item) => {
+			this.props.typing({typing: item.typing, typer: item.userName})
 		})
 	}
 	componentDidUpdate(){
@@ -65,7 +60,7 @@ export default class extends React.Component{
 	change(){
 		clearTimeout(this.timer);
 		var typing, userName;
-		userName = this.state.userName;
+		userName = this.props.current.userName;
 		typing = true;
 		this.socket.emit("typing", {userName, typing});
 		this.timer = setTimeout(() => {
@@ -74,29 +69,32 @@ export default class extends React.Component{
 		},2000)
 	}
 	pushChat(chat){
-		var chats = this.state.chats;
+		var chats = this.props.current.chats;
 		chats.push(chat)
-		this.setState({chats: chats})
+		this.props.pushChat();
+		// this.setState({chats: chats})
 	}
 	newChatMsg(msg){
-		var name = this.state.userName;
+		var name = this.props.current.userName;
 		var chats = {msg,name};
 		chats.status = "send";
 		this.pushChat(chats)
 		this.socket.emit("newMessage",{msg, name});
 	}
 	toggleState(name){
-		this.setState({chatVisible: true, userName: name})
+		this.props.toggleVisibility({chatVisible: true, userName: name});
+		// this.setState({chatVisible: true, userName: name})
 	}
 	render(){
 		return(
 			<div className="container">
-				<ChatList chats={this.state.chats}/>
-					<div id="typing" className={this.state.typing?"visible":"hidden"}>{this.state.typer} is typing.....</div>
+				<ChatList chats={this.props.current.chats}/>
+					<div id="typing" className={this.props.current.typing?"visible":"hidden"}>{this.props.current.typer} is typing.....</div>
 				{	
-					this.state.chatVisible? <InputField newChatMsg = {this.newChatMsg.bind(this)} change = {this.change.bind(this)} />:<Welcome toggleState = {this.toggleState.bind(this)} />
+					this.props.current.chatVisible? <InputField newChatMsg = {this.newChatMsg.bind(this)} change = {this.change.bind(this)} />:<Welcome toggleState = {this.toggleState.bind(this)} />
 				}
 			</div>
 		)
 	}
 }
+export default connect(current, action)(Main);
