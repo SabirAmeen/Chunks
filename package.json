@@ -11,12 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.2",
+    "fcm-push": "^1.1.2",
     "jquery": "^3.2.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-native-listener": "^1.0.2",
     "react-redux": "^5.0.5",
     "redux": "^3.6.0",
+    "request": "^2.81.0",
     "socket.io": "^2.0.1"
   },
   "devDependencies": {
