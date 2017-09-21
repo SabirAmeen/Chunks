@@ -72,7 +72,6 @@ class Main extends React.Component{
 		var chats = this.props.current.chats;
 		chats.push(chat)
 		this.props.pushChat();
-		// this.setState({chats: chats})
 	}
 	newChatMsg(msg){
 		var name = this.props.current.userName;
@@ -83,7 +82,6 @@ class Main extends React.Component{
 	}
 	toggleState(name){
 		this.props.toggleVisibility({chatVisible: true, userName: name});
-		// this.setState({chatVisible: true, userName: name})
 	}
 	render(){
 		return(
