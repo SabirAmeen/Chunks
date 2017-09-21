@@ -1,10 +1,13 @@
+html {
+    font-size: 10px;
+}
 html,
 body {
     height: 100%;
 }
 
 body {
-    padding-bottom: 50px;
+    padding-bottom: 5rem;
 }
 
 header {
@@ -12,14 +15,13 @@ header {
     display: table;
     background-color: #ECF3F3;
     text-align: center;
-    height: 50px;
 }
 
 header strong {
     display: table-cell;
     vertical-align: middle;
     color: #3498db;
-    font-size: 45px;
+    font-size: 2rem;
 }
 
 footer {
@@ -30,14 +32,14 @@ footer {
     background-color: black;
     left: 0;
     right: 0;
-    height: 50px;
+    height: 5rem;
     text-align: center;
 }
 
 footer strong {
     display: table-cell;
     vertical-align: middle;
-    font-size: 20px;
+    font-size: 2rem;
     color: white;
 }
 
@@ -45,13 +47,14 @@ footer strong {
     display: flex;
     align-items: center;
     position: relative;
-    height: 90%;
+    height: 100%;
 }
 
 .container {
-    height: 80%;
+    height: 100%;
+    width: 100%;
     border: 1px solid black;
-    padding: 20px;
+    padding: 1%;
 }
 
 .main {
@@ -69,18 +72,18 @@ footer strong {
 .main button {
     display: block;
     margin: 0 auto;
-    margin-top: 5px;
+    margin-top: .5rem;
 }
 
 .chatlist_container {
-    height: 84%;
+    height: 80%;
     border: 1px solid black;
     overflow-y: scroll;
 }
 
 .inputfield_container {
     height: 10%;
-    padding: 10px;
+    padding: 1rem;
     text-align: center;
 }
 
@@ -91,57 +94,60 @@ footer strong {
 }
 
 .inputfield_container button {
-    margin-left: 10px;
+    margin-left: 1rem;
 }
 
 .chat {
-    padding: 0 20px;
+    padding: 0 2rem;
 }
 .chat.send{
     text-align: right;
 }
 
 .talk-bubble {
-    margin: 40px;
+    margin: 1rem;
     display: inline-block;
     position: relative;
-    width: 200px;
+    max-width: calc(60% - 2rem);
     height: auto;
     background-color: #9b59b6;
 }
 
-.tri-right.left-in:after {
-    content: ' ';
-    position: absolute;
-    width: 0;
-    height: 0;
-    left: -20px;
-    right: auto;
-    top: 27px;
-    bottom: auto;
-    border: 12px solid;
-    border-color: #9b59b6 #9b59b6 transparent transparent;
-}
+// .tri-right.left-in:after {
+//     content: ' ';
+//     position: absolute;
+//     width: 0;
+//     height: 0;
+//     left: -2rem;
+//     right: auto;
+//     top: 2.7rem;
+//     bottom: auto;
+//     border: 1.2rem solid;
+//     border-color: #9b59b6 #9b59b6 transparent transparent;
+// }
 .tri-right.left-in.send:after{
     left: auto;
-    right: -20px;
+    right: -2rem;
     border: none;
 }
 
 .talktext {
-    padding: 1em;
+    padding: 1rem;
     text-align: left;
-    line-height: 1.5em;
+    line-height: 1rem;
 }
 
 .talktext p {
     /* remove webkit p margins */
-    -webkit-margin-before: 0em;
-    -webkit-margin-after: 0em;
+    word-break: break-word;
+    -webkit-margin-before: 0rem;
+    -webkit-margin-after: 0rem;
+    font-size: 1.3rem;
+    line-height: 1.6rem;
 }
 #typing{
     width: 100%;
-    height: 25px;
+    height: 2.5rem;
     display: block;
 }
 .visible{
@@ -149,4 +155,9 @@ footer strong {
 }
 .hidden{
     opacity: 0;
+}
+@media(min-width: 768px) {
+    html {
+        font-size: 12px;
+    }
 }
