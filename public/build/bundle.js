@@ -11418,6 +11418,24 @@ var Main = function (_React$Component) {
 			return _react2.default.createElement(
 				'div',
 				{ className: 'container' },
+				_react2.default.createElement(
+					'div',
+					{ className: '' },
+					_react2.default.createElement(
+						'h6',
+						null,
+						'Online Right Now'
+					),
+					_react2.default.createElement(
+						'ul',
+						{ className: 'online-list' },
+						_react2.default.createElement(
+							'li',
+							{ className: 'online-list-item' },
+							'sabir'
+						)
+					)
+				),
 				_react2.default.createElement(_chatList2.default, { chats: this.props.current.chats }),
 				_react2.default.createElement(
 					'div',

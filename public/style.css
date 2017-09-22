@@ -12,13 +12,11 @@ body {
 
 header {
     width: 100%;
-    display: table;
     background-color: #ECF3F3;
     text-align: center;
 }
 
 header strong {
-    display: table-cell;
     vertical-align: middle;
     color: #3498db;
     font-size: 2rem;
@@ -47,7 +45,7 @@ footer strong {
     display: flex;
     align-items: center;
     position: relative;
-    height: 100%;
+    height: calc(100% - 3rem);
 }
 
 .container {
@@ -99,6 +97,7 @@ footer strong {
 
 .chat {
     padding: 0 2rem;
+    font-size: 1.5rem;
 }
 .chat.send{
     text-align: right;
@@ -142,7 +141,7 @@ footer strong {
     word-break: break-word;
     -webkit-margin-before: 0rem;
     -webkit-margin-after: 0rem;
-    font-size: 1.3rem;
+    font-size: 1.7rem;
     line-height: 1.6rem;
 }
 #typing{
@@ -155,6 +154,18 @@ footer strong {
 }
 .hidden{
     opacity: 0;
+}
+.online-list {
+    width: 100%;
+    list-style-type: none;
+    padding: 0 10px;
+    white-space: no-wrap;
+    overflow-x: auto;
+    margin-bottom: 2px;
+}
+.online-list-item {
+    display: inline-block;
+    padding: 0 10px;
 }
 @media(min-width: 768px) {
     html {

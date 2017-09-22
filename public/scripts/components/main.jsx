@@ -86,6 +86,12 @@ class Main extends React.Component{
 	render(){
 		return(
 			<div className="container">
+				<div className="">
+					<h6>Online Right Now</h6>
+					<ul className="online-list">
+						<li className="online-list-item">sabir</li>
+					</ul>
+				</div>
 				<ChatList chats={this.props.current.chats}/>
 					<div id="typing" className={this.props.current.typing?"visible":"hidden"}>{this.props.current.typer} is typing.....</div>
 				{	
